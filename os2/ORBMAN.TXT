@@ -1,0 +1,782 @@
+
+                            ORB
+                   An HTML Preprocessor
+                Version 1.3 -- October 1996
+                             
+                       User’s Manual
+                             
+               Copyright 1996 by Craig Berry
+                             
+                    cberry@cinenet.net
+     http://www.cinenet.net/users/cberry/orbinfo.html
+
+
+1.   Overview
+
+Orb is a tool for Web developers which makes design,
+development, and maintenance of large sites easier.  I
+created it while working on my first relatively large Web
+project, the Ordo Templi Orientis U.S. Grand Lodge site at
+http://otohq.org/oto/ .  The uniform “look and feel” of
+that site was achieved and is maintained using Orb.
+
+Orb source files consist of normal HTML source with
+additional Orb-specific markup; the latter is parsed and
+replaced by Orb to create a pure HTML output file.  As a
+result, existing HTML files can simply be renamed (from
+.html to .orb) to become Orb files, with internal changes
+then made incrementally.
+
+
+1.1  Major features
+
+File Inclusion
+
+As in C and other programming languages, you can put common
+HTML elements (like navigation bars), variable definitions
+(see below), and so forth in "header files," which are then
+included by each Orb source file at a site.  Changing the
+look or contents of your site is then as easy as changing
+one header file and recompiling.
+
+Symbolic Variables
+
+Nothing is more annoying than re-entering a long link
+reference which occurs multiple times across many pages at
+a site.  Even if you use an HTML editor to simplify this
+task, you're still in trouble if the link address changes;
+this requires manual editting of each link instance...if
+you can find them all.  Orb allows you to define symbolic
+variable names for commonly used addresses, HTML elements,
+or whatever -- put these in a common header, and suddenly
+your maintenance problem is solved.
+
+Time Formatting
+
+Orb provides built-in support for including the date and
+time of HTML file creation on your pages in any desired
+format, using local or GMT time.  This makes it easy to
+"time stamp" your documents with last-revision information
+automatically.
+
+Conditional compilation
+
+What HTML gets generated can be made dependent on whether
+certain variables have been defined.  This is handy in (for
+example) using one source set to generate pages targeted
+for different browsers.
+
+Better comments
+
+Native HTML comments (like <!-- this -->) are notoriously
+hard to use.  Different browsers react differently to
+tricks such as commenting out HTML markup.  Orb provides
+its own comment syntax, for both single-line and block
+comments.  These comments entirely disappear during Orb
+preprocessing, making your production HTML files cleaner
+and shorter.
+
+Predefined variables
+
+Orb offers a variety of predefined variables for such
+things as the time and date of compilation, the Orb and
+HTML file names, and so forth.  These simplify many common
+site housekeeping chores, such as ensuring that all pages
+are marked with their last-modified dates.
+
+
+1.2  Orb vs. CGI/SSI
+
+Many of the things Orb is best at (file inclusion, last-
+modified date stamping, and so forth) can also be
+accomplished using CGI and even its subset, Server-Side
+Includes (SSI).  However, Orb is a better solution for
+building page data if that data changes relatively
+infrequently.  Consider that CGI/SSI requires server-side
+system resources on each page fetch to construct the served
+page, while Orb allows this overhead to be paid just once,
+at page compilation time, with zero additional cost during
+page accesses.  Also, CGI and SSI are not available on all
+Web servers, nor are the details of usage identical between
+servers which do support them.  All told, there’s a great
+deal to be said for the Orb preprocessing approach over
+CGI/SSI.
+
+
+1.3  Availability
+
+Orb is available for a number of platforms, including DOS,
+OS/2, and various flavors of Unix.  For current information
+on supported platforms and other late-breaking
+developments, consult the Orb information page at
+http://www.cinenet.net/users/cberry/orbinfo.html.
+
+Orb is shareware.  If you find this tool useful in creating
+and managing your Web sites, please register your copy by
+sending $20 (US) to the following address:
+
+               Craig Berry
+               11301 W. Olympic Blvd., #547
+               W. Los Angeles, CA 90064  USA
+
+Be sure to include your email and (optionally) snail-mail
+address with your payment.  Registering Orb will ensure
+that you receive all future upgrades directly by email when
+they become available.  Perhaps more important, it will
+compensate me for the time and effort involved in creating
+Orb, encouraging me and other developers to continue making
+high-quality software available through shareware
+distribution.
+
+
+1.4  Notes
+
+I welcome comments, suggestions, and bug reports concerning
+Orb, from both registered and unregistered users.  I can be
+reached at cberry@cinenet.net.
+
+The name “Orb” refers to the most commonly recognized form
+of spiderweb -- the “circles and spokes” variety created by
+many garden spiders.  I wanted a short, catchy name which
+had something to do with the Web; Orb struck me as a
+natural.
+
+
+2.   Installation
+
+
+2.1  Parts list
+
+The following files comprise the DOS and OS/2 shareware
+packages:
+
+ORB.EXE        The Orb preprocessor itself
+ORBMAN.TXT     A plain text (“flat ASCII”) version of the
+               Orb User’s Manual
+ORBMAN.WRI     A Microsoft Windows Write version of the Orb
+               User’s Manual
+TEST1.ORB      An example Orb home page source file
+TEST2.ORB      An example Orb subpage source file
+HEADER.ORH     An example Orb header include file
+FOOTER.ORH     An example Orb footer include file
+TEST.MAK       An example Orb makefile
+
+On other operating systems, the .WRI version of the
+documentation is omitted, the filenames are lowercase, and
+the executable will be named “orb” with no extension.
+
+
+2.2  System Requirements
+
+The following applies only to Orb for DOS:
+
+- IBM PC or compatible, 8086+
+- DOS v3+
+- 100+ KB conventional memory
+- Text display (no graphics required)
+
+Orb uses no temporary files, initialization files, or
+anything of that sort.  The Orb executable contains
+everything needed by the Orb application; all other
+components of the distribution package are documentation
+and examples.  Orb also makes no use of extended or
+expanded memory.
+
+
+2.3  Installation steps
+
+1. Create a new directory for the Orb components -- C:\ORB
+under DOS, for example.
+2. Copy the Orb distribution files into this directory.
+3. Edit your AUTOEXEC.BAT, .cshrc script, or whatever,
+adding the Orb directory to your PATH variable.
+
+
+3.   How It Works
+
+Note that in the following description, DOS filename
+conventions are used.  Under Unix and many other operating
+systems, the standard extensions are lowercase, and can be
+longer than three characters.  Orb tries to do the “right
+thing” on each platform.
+
+Orb is a preprocessor which allows you to create Web pages
+using a superset of HTML.  By convention, Orb input files
+have the extension .ORB (for primary source files) or .ORH
+(for “header” files which are to be included in other Orb
+files).  Orb will (in most cases) generate one output file
+(with the default extension .HTM) for each primary source
+(.ORB) file it processes, using the original base name of
+each input file.  So, for example, the command
+
+  orb foo.orb bar.orb baz.orb
+
+would (if all went well, and no output-redirection
+overrides occurred in the source files) create three files
+named FOO.HTM, BAR.HTM, and BAZ.HTM.  One may think of Orb
+as compiling .ORB source files for use on your Web site as
+.HTM “executables,” in analogy with the way (for example)
+.C source files are compiled into .EXE files by a C
+compiler.
+
+Because Orb is a superset of HTML, it will (in almost all
+cases) pass ordinary HTML content through to the output
+file undisturbed.  This is an important consideration if
+you are converting existing HTML documents into Orb source
+files.  You can achieve the first step just by renaming
+XXX.HTM to XXX.ORB, with the latter compiling to yield the
+original file.  You may then begin adding Orb elements
+incrementally.
+
+Orb will only take special action when it finds an Orb
+element in the input file.  All Orb elements consist of a
+pair of open-square-brackets - [[ - followed by zero or
+more other characters, possibly including embedded Orb
+elements, followed by a balancing pair of close-square-
+brackets - ]] - all on the same source line.  Note that
+nesting can occur; the (nonsensical) source line
+
+  Blah blah [[foo [[bar]][[baz]]]] and blah blah blah
+
+contains one top-level Orb element, which in turn contains
+two nested elements.
+
+In order to provide maximum compatibility with existing
+HTML documents which might happen to contain square-bracket
+pairs, Orb will pass through without modification anything
+that looks like an element, but cannot be parsed to yield a
+valid operation (see next section).  Orb will generate a
+warning in this circumstance, however.
+
+Orb elements are intended to perform operations -- sending
+special text to the output file, or changing the internal
+state of Orb itself by defining a variable, or perhaps
+conditionally or unconditionally suppressing output from a
+region of the source file.  Operations come in two
+varieties -- directives and variable references.
+
+
+3.1  Directives
+
+Directives all begin with a dollar sign - $ - just inside
+the opening [[.  They cause Orb to perform special
+functions like setting variable values, outputting
+formatted dates, including other files to be processed by
+Orb, and controlling processing of sections of the source
+file.  The following directives are currently defined (note
+that all directive names are case sensitive):
+
+
+3.1.1     Variable value manipulation
+
+$define name {value}
+[Synonyms:  $def, $set]
+Sets the value of an Orb variable, which may then be used
+in later variable references (see below).  If name has
+already been set, the new value quietly replaces the old
+one.  The name should include only letters, digits, and
+underscores, start with a letter or underscore, and be at
+most 32 characters long (these limitations are not all
+currently enforced, but will be in an upcoming version).
+The value may contain spaces, embedded Orb elements, and
+anything else up to the closing ]] -- though remember that
+it must all fit on a single source line.  Leading spaces in
+the value are not included, but explicit spaces may be
+obtained using the SP predefined variable if required.  If
+value is not provided, a zero-length string is used.  The
+$def synonym is intended as a convenient abbreviation which
+also better parallels $ifdef, $undef, and so forth.  The
+$set synonym is provided for backward-compatibility with
+earlier versions of Orb.  The next major version will drop
+support for $set, so don’t use it in new development, and
+change old source to use $def/$define as soon as possible.
+Example:  [[$define email cberry@cinenet.net]]
+
+$undef name
+Causes Orb to “forget” the value of a variable.  No warning
+is generated if the variable does not exist.
+Example:  [[$undef email]]
+
+$val var {default}
+If the variable var is defined, this behaves just like a
+simple variable reference (see below), substituting that
+variable’s value into the output.  If var is not defined,
+the value of default is used instead.  If default is not
+provided, no output occurs for this directive.
+Example:  [[$val title No title provided]]
+
+
+3.1.2     Conditional compilation
+
+$ifdef name
+Starts a conditional-compilation block.  If name is
+defined, everything proceeds normally until an $else or
+$endif is encountered.  If name is not defined, nothing
+will be processed from the source file until the next $else
+or $endif.  In the $else case, the source between that
+$else and the closing $endif will be processed if the code
+above the $else was not, and vice versa.  See “Conditional
+Logic” below for more discussion and examples.
+Example:  [[$ifdef toplevel]]Hey, I have a top
+level![[$endif]]
+
+$ifndef name
+The reverse of $ifdef; conditonally compiles based on
+whether name is not defined.
+Example:  [[$ifndef toplevel]]Oops, I don’t have a top
+level![[$endif]]
+
+$else
+Only occurs inside if-blocks (see $ifdef).  Causes the
+conditional state to flip; active if it was inactive, and
+vice versa.  Only one $else can follow each $ifdef/$ifndef.
+Example:
+[[$ifdef foo]]
+I have foo...
+[[$else]]
+I don’t have foo.
+[[$endif]]
+
+$endif
+Closes an if-block.  Only one can follow a given
+$ifdef/$ifndef.
+
+
+3.1.3     File handling
+
+$include filename
+Brings the entire contents of the named file into the
+current one, as if the text of that file were contained in
+this one.  By convention, files intended for inclusion in
+this manner have the extension .ORH (“ORb Header”).  Note
+that the -I command line option and the ORBPATH environment
+variable can be used to specify additional directories in
+which to search for include files.  The current directory
+is always searched first, then any -I paths, and finally
+paths from ORBPATH.
+Example:  [[$include header.orh]]
+
+$target filename
+Closes the current output (“target”) file, opens the named
+file as the new output file, and continues compilation of
+the source file.  This allows a single Orb source file to
+produce several HTML output files.
+Example:  [[$target part2.html]]
+
+
+3.1.4     Time formatting
+
+$time {mode {format}}
+Sends a textual representation of the current system time
+at the start of compilation to the output file.  The mode
+argument can be lcl, which selects local time, or gmt,
+which selects Greenwich Mean Time, also known as UTC time.
+The format argument provides a time format string of the
+type used by the ANSI C strftime() function (see Appendix C
+for details).  If no arguments are given, local time is
+assumed; if no format is supplied, the output looks like
+this:  1996/03/17 15:23:34  -- with the hour in 24-hour
+(“military”) format.  See also the datetime_gmt and
+datetime_lcl predefined variables, described below, for
+another approach to using time value in Orb.
+Example:  [[$time gmt %M/%D/%y]]
+This example outputs the month, day, and two-digit year,
+separated by slashes.
+
+
+3.1.5     Comments
+
+$comment
+[Synonym:  $/*]
+Opens a comment block.  This will inactivate all other Orb
+processing and output until a matching $endcomment
+(synonym: $*/) is encountered.  Note that this even
+overrides conditional compilation; a comment opening inside
+an “inactive” block will start a comment block, which will
+in turn hide all conditional directives until the comment
+closes.  The synonym $/* is inspired by the C open-comment
+marker.
+Example:  [[$/*]]Here I am, inside a comment[[$*/]]
+
+$endcomment
+[Synonym:  $*/]
+Closes a comment block.
+
+$rem anything
+[Synonym:  $//]
+Completely ignores its arguments and sends nothing to the
+output file.  The may be used to put comments (“rem” is
+short for “remark”) in Orb text.  The $// synonym is
+inspired by the C++ unterminated-comment mark; note that
+(unlike the C++ version) a space must separate the $// and
+what follows.
+Example:  [[$rem This section defines globally useful
+links.]]
+
+
+3.1.6     User-detected errors
+
+$error anything
+[Synonym: $err]
+Halts Orb processing with a fatal error, incorporating the
+error-message in the resulting message to the user.  This
+can be combined with conditional processing to detect
+configuration problems; for example, if some value is
+supposed to be provided on the Orb command line using the -
+D option (see below), you can check for this using this
+syntax...
+Example:
+  [[$ifndef cfgparm]]
+  [[$error cfgparm not defined on command line!]]
+  [[$endif]]
+
+$message anything
+[Synonym: $msg[
+Similar to $error, but for informational and warning-level
+messages.  Does not halt Orb processing.
+
+
+3.2  Variable References
+
+The value of a variable defined with the $def directive
+(see above) or provided by Orb (see below) can be placed in
+the output file using a variable reference.  This consists
+simply of the name of the variable, enclosed by bracket
+pairs as usual.  So, for example, the Orb source statements
+
+  [[$def email cberry@cinenet.net]]
+  
+  You can <A HREF=“mailto:[[email]]”>contact me</A>
+  for more information about Orb.
+
+would produce this output:
+
+  You can <A HREF=“mailto:cberry@cinenet.net>contact me</A>
+  for more information about Orb.
+
+As mentioned above, each variable reference returns the
+most recent value assigned to that variable.  Note that an
+Orb element which looks like a variable reference, but
+names a nonexistent variable, will be passed through “raw”
+(square brackets and all) to the output.  The Orb compiler
+will generate a warning message if this occurs.
+
+
+3.3  Predefined Orb variables
+
+The Orb compiler itself makes a few useful variables
+available to you.  Note that your own Orb code should avoid
+changing these values, though nothing prevents you from
+doing so.
+
+
+3.3.1     Orb configuration information
+
+orb_platform   The platform on which Orb is being run
+               (e.g., “DOS”).
+
+orb_vernum     The version number of Orb, X.Y (e.g.,
+               “1.2”).
+
+orb_version    A string indicating Orb’s version and
+               platform information (e.g., “Orb v1.2 for
+               DOS”).
+
+orb_generator  A preformatted META tag, suitable for direct
+               inclusion in an HTML <HEAD> section,
+               indicating that the target HTML document was
+               generted by Orb (e.g., “<META
+               NAME=“generator” CONTENT=“Orb v1.2 for
+               DOS”>“).
+
+
+3.3.2     File information
+
+base           The name of the primary source file (the
+               .ORB file, most typically) which is
+               currently being compiled.  Note that this
+               stays fixed throughout the compilation of a
+               given .ORB file, as opposed to the source
+               variable (see below), which changes to track
+               included files.
+
+source         The name of the specific source file
+               currently being processed by Orb.
+               Initially, this will be the same value as
+               base, but source will change if other files
+               are brought in using the $include directive.
+
+target         The target, or output file, of the current
+               compilation; typically a file with the
+               extension .html.
+
+
+3.3.3     Time information
+
+datetime_gmt   The date and time at the start of Orb
+               compilation, expressed in the HTTP standard
+               format, which looks like:  Sunday, 03-Mar-96
+               23:45:14 GMT
+
+datetime_local As above, but the local time rather than
+               GMT.  If your environment is set up properly
+               (most notably, if you’ve defined the
+               environment variable TZ), your own timezone
+               code will replace GMT at the end of the
+               string.
+
+
+3.3.4     Special characters
+
+OBR            One open-square-bracket - [
+
+OBR2           Two open-square-brackets - [[
+
+CBR            One close-square-bracket - ]
+
+CBR2           Two close-square-brackets - ]]
+
+NL             Newline.  Becaue it's currently difficult to
+               represent a newline in ORB, this predefined
+               variable is provided for your use.  Because
+               of the near insensitivity of HTML to textual
+               line structure, the uses of this variable
+               should be relatively few.
+
+SP             A single space character.  This is useful
+               for adding blank space to the beginning of a
+               variable’s value in a $def directive.
+
+
+4.   File processing
+
+A backslash \ at the very end of a line (followed by
+nothing but the end-of-line character) may be used to
+“splice” two lines together.  The \ itself is discarded.
+This can be used to spread an Orb element over several
+source lines, while obeying the one-line-per-element rule.
+
+In the unlikely event your source has meaninful \
+characters at the ends of lines which must be preserved in
+the output HTML, the -s option turns off line splicing.
+However, note that putting a space after the \ would
+accomplish the same goal.  The -s option is provided only
+in the interests of fulfilling Orb’s design goal of passing
+through all existing HTML source without modification.
+
+
+5.   Running Orb
+
+Orb accepts a number of command line options.  The full
+syntax is:
+
+  orb { opt | file }+
+
+That is, an orb command may take one or more arguments,
+which can be options and file names in any order.  Note
+that options (which begin with a dash) only apply to files
+listed after that option.  Thus, typically you will want to
+put all the options first.
+
+The options available are:
+
+-b             “Bashful” mode -- suppresses title/copyright
+               message.
+
+-Ccase         Controls case-adjustment of all filenames.
+               This option will rarely be necessary on
+               operating systems other than DOS.  The three
+               case values supported are L (lowercase), U
+               (uppercase), and M (mixed case).  The
+               default is -CL under DOS, and -CM on all
+               other operating systems.  Because DOS
+               filenames are case insensitive, it is wise
+               to force them to a single case for
+               consistency.  Generally, lowercase is more
+               attractive, but you can force uppercase
+               using -CU.
+
+-Dvar={val}    One syntax for command-line variable
+               definition.  Within all source files listed
+               after this option, the variable var will be
+               defined with the value val, just as if it
+               had appeared in a $def directive.  If val is
+               omitted, var will be given a zero-length
+               string value.
+
+-Dvar val      Alternate syntax for command-line variable
+               definition.  In this form, the value is
+               listed as a separate argument, immediately
+               following the -D option.  On some operating
+               systems (notably DOS), this makes it
+               possible to define variables from the
+               command line whose values contain spaces
+               (e.g., -Dtitle “My Home Page”).
+
+-Ipath         Give alternate directories in which to find
+               include files (see $include directive,
+               above).  Directories are separated by
+               semicolons under DOS and OS/2, and by colons
+               elsewhere.
+
+-h or -?       Prints out an abbreviated version of this
+               option description.
+
+-ofilename     Send output to the named file, overriding
+               the default behavior of using the source
+               file basename and a .html extension.
+
+-o+{filename}  Send output to the “standard output” (the
+               screen, unless you redirect it via a pipe or
+               > on the command line).  If the optional
+               file name is supplied, Orb pretends
+               internally that it’s writing to the file
+               named for purpses of setting the target
+               variable.
+
+-q and -v      By default, Orb produces enough output to
+               let you know that progress is being made,
+               without going overboard with detailed
+               messages.  These two options can be used to
+               change this behavior.  -q selects “quiet”
+               mode, in which only the copyright notice and
+               serious error messages appear.  -v selects
+               “verbose” mode, in which more low-level
+               information about Orb processing is
+               displayed.
+
+-s             Turns off line-splicing (see “File
+               processing,” above).
+
+-xstring       By default, Orb will use the extension .html
+               for the output files it generates.  The -x
+               option allows you to specify a different
+               string for Orb to use.  It may be up to 10
+               characters long.  You should not include the
+               initial period in this string!  Note that
+               only the first three characters will
+               actually appear in the generated file’s name
+               under DOS, but the target predefined
+               variable will have the full extension.
+
+For example, the Orb command line
+
+  orb -v -xhtx -Dtitle “Test” -Dlogo=logo13.gif test1.orb
+
+would compile test1.orb to test1.htx, producing lots of
+output along the way.  The variables “title” and “logo”
+would be defined as indicated during the compilation.
+
+Wildcards in file names are fully supported, following the
+usual conventions for each operating system.  Orb will
+return a zero status code on successful completion; any
+nonzero value indicates a compilation failure has occurred.
+
+An environment variable, ORBPATH, may be used to specify a
+standard set of paths to search for include files.  Under
+DOS, the list of paths should be separated with semicolons;
+on all other platforms, colons should be used.  For
+example, you might add this line to your AUTOEXEC.BAT under
+DOS:
+
+  set ORBPATH=c:\www\pages\std;c:\www\pages\local
+
+This would cause Orb to search first the current directory,
+then any directories specified using the -I command line
+option, and finally these two directories when trying to
+locate an include file.
+
+
+6.   Orb and MAKE
+
+Orb is easy to use with any standard MAKE program.  MAKE is
+a utility included with many compilers which simplifies the
+process of building large software systems.  MAKE operates
+on a "Makefile" which contains instructions on how to
+transform source files into object code.  It examines file
+revision dates to ensure that only necessary compilations
+occur.  The example file TEST.MAK, included with this
+distribution, demonstrates one way to set up an implicit
+rule for building HTML files from Orb source files.
+Obviously, this two-page project cannot really display the
+usefulness of MAKE, but for larger projects, MAKE's ability
+to rebuild only those components necessary after a source
+change can be very, very useful.
+
+
+7.   Example Files
+
+Included with the shareware distribution of Orb are four
+example Orb source files, TEST1.ORB, TEST2.ORB, HEADER.ORH,
+and FOOTER.ORH.  You can compile the two example .ORB files
+to TEST1.HTM and TEST2.HTM by entering the command
+
+  orb *.orb
+
+or, if you have a typical MAKE program, you can enter the
+command
+
+  make -ftest.mak
+
+Note that HEADER.ORH and FOOTER.ORH are intended to
+demonstrate how a consistent “look and feel” can be
+attained by encapsulating common HTML elements in include
+files; these files could be shared by many other .ORB files
+at a large site.
+
+Appendix A: Acknowledgments
+
+Two Orb beta testers, Arnoud Galactus Engelfriet and Nick
+Sweeney, deserve special recognition.  Their feature
+suggestions and boundless patience with buggy early betas
+have been of enormous value to me.
+
+Appendix B: Change History
+
+1996/03/01     1.0:  Original release
+1996/03/25     1.0a:  Doc-only update - coverage of all
+               operating systems, pointer to Orb web page,
+               more overview material.
+1996/04/01     1.1:  -C, -D, -I, -?/h command-line opts,
+               $val and $target directives, support for
+               empty-value $set, ORBPATH environment
+               variable.
+1996/05/23     1.2:  conditionals, block comments, line
+               splicing, error directive, many new
+               predefined variables.
+1996/11/17     1.3:  Better memory handling, many bug
+               fixes.
+
+Appendix C: Time formatting
+
+Here are some typical values for time format strings used
+by the $time directive.  The exact set available will vary
+from platform to platform; under Unix, do “man strftime” to
+see your local list.
+
+%%   same as the ``percent'' character (%)
+%a   locale's abbreviated weekday name (“Sun”)
+%A   locale's full weekday name (“Sunday”)
+%b   locale's abbreviated month name (“Nov”)
+%B   locale's full month name (“November”)
+%c   locale's appropriate date and time representation
+%d   day of month ( 01 - 31 )
+%H   hour ( 00 - 23 )
+%I   hour ( 01 - 12 )
+%j   day number of year ( 001 - 366 )
+%m   month number ( 01 - 12 )
+%M   minute ( 00 - 59 )
+%p   locale's equivalent of either AM or PM
+%S   seconds ( 00 - 61 ), allows for leap seconds
+%U   week number of year ( 00 - 53  ),  Sunday  is  the
+     first day of week 1
+%w   weekday number ( 0 - 6 ), Sunday = 0
+%W   week number of year ( 00 - 53  ),  Monday  is  the
+     first day of week 1
+%x   locale's appropriate date representation
+%X   locale's appropriate time representation
+%y   year within century ( 00 - 99 )
+%Y   year as ccyy ( for example 1986)
+%Z   time zone name or no characters if  no  time  zone
+     exists
+
